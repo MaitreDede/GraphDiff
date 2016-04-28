@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>RefactorThis.GraphDiff.ShiftDigital</id>
-        <version>2.0.2</version> 
+        <version>2.0.3</version> 
         <title>GraphDiff - Entity Framework graph auto-update</title>
         <authors>Kyle2123</authors>
         <owners>Kyle2123</owners>
@@ -13,7 +13,11 @@
 		Fork of GraphDiff to allow support for copying PK values from entities saved to database back to original entity.
 </description>
         <summary>MIT (c) Kyle West</summary>
-        <releaseNotes>v2.0.2
+        <releaseNotes>v2.0.3
+2.0.3
+- Bug fix: Changing FK ID on an entity without updating associated navigation property and saving would not persist updated FK ID to database.
+		
+2.0.2		
 - Added ability to track list of entities updated by UpdateGraph() and CopyEntityValues() extension method on DbContext co copy simple property values from one entity to another. Provides a way to copy PK's retrieved from the Db post-save back to the original entity objects.	
 </releaseNotes>
         <copyright>Kyle West</copyright>

@@ -38,13 +38,28 @@ namespace RefactorThis.GraphDiff.Internal.Graph
         // overridden by different implementations
         public virtual void Update<T>(IChangeTracker changeTracker, IEntityManager entityManager, T persisted, T updating) where T : class
         {
-            changeTracker.UpdateItem(updating, persisted, true);
-
             // Foreach branch perform recursive update
             foreach (var member in Members)
             {
                 member.Update(changeTracker, entityManager, persisted, updating);
             }
+
+            // KW 04/28/16
+            // Originally this code was calling changeTracker.UpdateItem() before recursing to child members.
+            // This caused a bug where if you change just an FK ID on the entity, but not the associated nav 
+            // property, the update is not saved.
+
+            // The reason is because when UpdateItem() is called and the updated FK ID value is copied over 
+            // to the persisted entity, it nulls out the associated nav property (Probably because the FK ID 
+            // doesn't match the ID on the nav property.)  So then when the code runs to update child members, 
+            // it sees that the child nav property is null on persisted, and is defined on updating, so it registers 
+            // that as a change as well.  So there are two changes, the real change (Updated FK ID), and the nav 
+            // property change (NULL back to original value).  The nav property change was the one that was winning,
+            // resulting in the real intended change not being saved to the database.
+            //
+            // Updating the child members first, and then updating the entities own properties after seems to
+            // fix this problem because the FK ID is changed last.
+            changeTracker.UpdateItem(updating, persisted, true);
         }
 
         public List<string> GetIncludeStrings(IEntityManager entityManager)
