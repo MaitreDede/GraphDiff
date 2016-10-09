@@ -88,6 +88,16 @@ namespace RefactorThis.GraphDiff.Internal
                 .ToList();
         }
 
+        public IEnumerable<PropertyInfo> GetSimplePropertiesForType(Type entityType)
+        {
+            return ObjectContext.MetadataWorkspace
+                    .GetItems<EntityType>(DataSpace.OSpace)
+                    .Single(p => p.FullName == entityType.FullName).Properties
+                    .Where(p => !p.IsComplexType)
+                    .Select(k => entityType.GetProperty(k.Name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+                    .ToList();
+        }
+
         public IEnumerable<NavigationProperty> GetRequiredNavigationPropertiesForType(Type entityType)
         {
             return GetNavigationPropertiesForType(ObjectContext.GetObjectType(entityType))

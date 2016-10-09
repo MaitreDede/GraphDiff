@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>RefactorThis.GraphDiff.ShiftDigital</id>
+        <version>2.0.3</version> 
+        <title>GraphDiff - Entity Framework graph auto-update</title>
+        <authors>Kyle2123</authors>
+        <owners>Kyle2123</owners>
+        <projectUrl>https://github.com/Kyle2123/GraphDiff</projectUrl>
+        <iconUrl>http://s8.postimg.org/r3f1stx69/Graph_Diff.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>GraphDiff - Allows for automatic update of a graph of detached entities using Entity Framework v6+.
+		Fork of GraphDiff to allow support for copying PK values from entities saved to database back to original entity.
+</description>
+        <summary>MIT (c) Kyle West</summary>
+        <releaseNotes>v2.0.3
+2.0.3
+- Bug fix: Changing FK ID on an entity without updating associated navigation property and saving would not persist updated FK ID to database.
+		
+2.0.2		
+- Added ability to track list of entities updated by UpdateGraph() and CopyEntityValues() extension method on DbContext co copy simple property values from one entity to another. Provides a way to copy PK's retrieved from the Db post-save back to the original entity objects.	
+</releaseNotes>
+        <copyright>Kyle West</copyright>
+        <language>en-US</language>
+        <tags>EntityFramework, EF, CodeFirst, DetachedUpdate</tags>
+        <dependencies>
+            <dependency id="EntityFramework" version="6.0.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="GraphDiff\bin\Debug\RefactorThis.GraphDiff.ShiftDigital.dll" target="lib\net40\RefactorThis.GraphDiff.ShiftDigital.dll" />
+        <file src="GraphDiff\bin\Debug\RefactorThis.GraphDiff.ShiftDigital.pdb" target="lib\net40\RefactorThis.GraphDiff.ShiftDigital.pdb" />
+    </files>
+</package>

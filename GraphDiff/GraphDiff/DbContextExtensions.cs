@@ -24,9 +24,9 @@ namespace RefactorThis.GraphDiff
         /// <param name="mapping">The mapping configuration to define the bounds of the graph</param>
         /// <param name="updateParams">Update configuration overrides</param>
         /// <returns>The attached entity graph</returns>
-        public static T UpdateGraph<T>(this DbContext context, T entity, Expression<Func<IUpdateConfiguration<T>, object>> mapping, UpdateParams updateParams = null) where T : class
+        public static T UpdateGraph<T>(this DbContext context, T entity, Expression<Func<IUpdateConfiguration<T>, object>> mapping, UpdateParams updateParams = null, Action<object, object> trackEntityUpdate = null) where T : class
 	    {
-            return UpdateGraph(context, entity, mapping, null, updateParams);
+            return UpdateGraph(context, entity, mapping, null, updateParams, trackEntityUpdate);
 	    }
 
         /// <summary>
@@ -38,9 +38,9 @@ namespace RefactorThis.GraphDiff
         /// <param name="mappingScheme">Pre-configured mappingScheme</param>
         /// <param name="updateParams">Update configuration overrides</param>
         /// <returns>The attached entity graph</returns>
-        public static T UpdateGraph<T>(this DbContext context, T entity, string mappingScheme, UpdateParams updateParams = null) where T : class
+        public static T UpdateGraph<T>(this DbContext context, T entity, string mappingScheme, UpdateParams updateParams = null, Action<object, object> trackEntityUpdate = null) where T : class
         {
-            return UpdateGraph(context, entity, null, mappingScheme, updateParams);
+            return UpdateGraph(context, entity, null, mappingScheme, updateParams, trackEntityUpdate);
         }
 
         /// <summary>
@@ -51,9 +51,9 @@ namespace RefactorThis.GraphDiff
         /// <param name="entity">The root entity.</param>
         /// <param name="updateParams">Update configuration overrides</param>
         /// <returns>The attached entity graph</returns>
-        public static T UpdateGraph<T>(this DbContext context, T entity, UpdateParams updateParams = null) where T : class
+        public static T UpdateGraph<T>(this DbContext context, T entity, UpdateParams updateParams = null, Action<object, object> trackEntityUpdate = null) where T : class
         {
-            return UpdateGraph(context, entity, null, null, updateParams);
+            return UpdateGraph(context, entity, null, null, updateParams, trackEntityUpdate);
         }
 
         /// <summary>
@@ -79,9 +79,26 @@ namespace RefactorThis.GraphDiff
             return queryLoader.LoadEntity(keyPredicate, includeStrings, queryMode);
         }
 
+        public static void CopyEntityValues(this DbContext context, object sourceEntity, object targetEntity)
+        {
+            if (sourceEntity == null)
+                throw new ArgumentException("sourceEntity");
+            if (targetEntity == null)
+                throw new ArgumentException("targetEntity");
+            if (sourceEntity.GetType() != targetEntity.GetType())
+                throw new ArgumentException("Source and Target entities must be same type.");
+
+            var entityManager = new EntityManager(context);
+            var simpleProps = entityManager.GetSimplePropertiesForType(sourceEntity.GetType());
+            foreach(var simpleProp in simpleProps)
+            {
+                simpleProp.SetValue(targetEntity, simpleProp.GetValue(sourceEntity, null), null);
+            }
+        }
+
         // other methods are convenience wrappers around this.
         private static T UpdateGraph<T>(this DbContext context, T entity, Expression<Func<IUpdateConfiguration<T>, object>> mapping,
-                                        string mappingScheme, UpdateParams updateParams) where T : class
+                                        string mappingScheme, UpdateParams updateParams, Action<object, object> trackEntityUpdate) where T : class
         {
             if (entity == null)
                 throw new ArgumentNullException("entity");
@@ -91,7 +108,7 @@ namespace RefactorThis.GraphDiff
             var register = new AggregateRegister(new CacheProvider());
 
             var root = GetRootNode(mapping, mappingScheme, register);
-            var differ = new GraphDiffer<T>(context, queryLoader, entityManager, root);
+            var differ = new GraphDiffer<T>(context, queryLoader, entityManager, root, trackEntityUpdate);
 
             var queryMode = updateParams != null ? updateParams.QueryMode : QueryMode.SingleQuery;
             return differ.Merge(entity, queryMode);

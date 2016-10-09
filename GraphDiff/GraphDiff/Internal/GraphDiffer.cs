@@ -17,13 +17,15 @@ namespace RefactorThis.GraphDiff.Internal
         private readonly DbContext _dbContext;
         private readonly IQueryLoader _queryLoader;
         private readonly IEntityManager _entityManager;
+        private readonly Action<object, object> _trackEntityUpdate;
 
-        public GraphDiffer(DbContext dbContext, IQueryLoader queryLoader, IEntityManager entityManager, GraphNode root)
+        public GraphDiffer(DbContext dbContext, IQueryLoader queryLoader, IEntityManager entityManager, GraphNode root, Action<object, object> trackEntityUpdate)
         {
             _root = root;
             _dbContext = dbContext;
             _queryLoader = queryLoader;
             _entityManager = entityManager;
+            _trackEntityUpdate = trackEntityUpdate;
         }
 
         public T Merge(T updating, QueryMode queryMode = QueryMode.SingleQuery)
@@ -57,9 +59,8 @@ namespace RefactorThis.GraphDiff.Internal
 
                 // Perform recursive update
                 var entityManager = new EntityManager(_dbContext);
-                var changeTracker = new ChangeTracker(_dbContext, entityManager);
+                var changeTracker = new ChangeTracker(_dbContext, entityManager, _trackEntityUpdate);
                 _root.Update(changeTracker, entityManager, persisted, updating);
-
                 return persisted;
             }
             finally

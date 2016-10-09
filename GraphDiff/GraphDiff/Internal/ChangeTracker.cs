@@ -43,16 +43,18 @@ namespace RefactorThis.GraphDiff.Internal
     {
         private readonly DbContext _context;
         private readonly IEntityManager _entityManager;
+        private readonly Action<object, object> _trackEntityUpdate;
 
         private ObjectContext ObjectContext
         {
             get { return ((IObjectContextAdapter)_context).ObjectContext; }
         }
 
-        public ChangeTracker(DbContext context, IEntityManager entityManager)
+        public ChangeTracker(DbContext context, IEntityManager entityManager, Action<object, object> trackEntityUpdate)
         {
             _entityManager = entityManager;
             _context = context;
+            _trackEntityUpdate = trackEntityUpdate;
         }
 
         public void AddItem(object item)
@@ -78,6 +80,9 @@ namespace RefactorThis.GraphDiff.Internal
             {
                 keyProperty.SetValue(to, keyProperty.GetValue(from, null), null);
             }
+
+            if (_trackEntityUpdate != null)
+                _trackEntityUpdate(from, to);
 
             _context.Entry(to).CurrentValues.SetValues(from);
         }
