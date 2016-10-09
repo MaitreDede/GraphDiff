@@ -28,6 +28,10 @@ namespace RefactorThis.GraphDiff.Internal.Graph
             if (newValue == null)
             {
                 SetValue(persisted, null);
+                if (dbValue != null)
+                {
+                    changeTracker.RemoveItem(dbValue);
+                }
                 return;
             }
 
@@ -37,6 +41,10 @@ namespace RefactorThis.GraphDiff.Internal.Graph
             }
             else
             {
+                if (dbValue != null)
+                {
+                    changeTracker.RemoveItem(dbValue);
+                }
                 dbValue = CreateNewPersistedEntity(changeTracker, persisted, newValue);
             }
 
